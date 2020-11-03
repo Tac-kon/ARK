@@ -1,0 +1,10 @@
+Max_height    : 1222.03 [m]
+Max_time      :   17.48 [s]
+Launch_clear  :   23.00 [m/s]
+Max_vercity   :  183.01 [m/s]
+PARA1_TIME    :   0.00 [m/s]
+PARA1_2_V     : 100.4 [m/s]
+PARA2_V       : -100.1 [m/s]
+distance_y    :   0.0 [m]
+distance_x    : 1107.7 [m]
+
