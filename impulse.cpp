@@ -3,18 +3,18 @@
 
 //インパルス計算巻数
 double impulse(double t) {
-    double T;
-    if (t < ThrustTimeStamp[0] || t >ThrustTimeStamp[ThrustCount -1]) {
-        T = 0;
-        return T;
+    double Thrust;
+    if (t < FThrustTimeStamp[0] || t >FThrustTimeStamp[FThrustCount -1]) {
+        Thrust = 0;
+        return Thrust;
     }
-    while (t >= ThrustTimeStamp[0] && t <= ThrustTimeStamp[ThrustCount -1]) {
-        if (/*t >= ThrustTimeStamp[ThrustIndex] &&*/ t < ThrustTimeStamp[ThrustIndex + 1]/* && t <= ThrustTimeStamp[ThrustCount]*/) {
-            T = Thrust[ThrustIndex + 1] + (Thrust[ThrustIndex + 1] - Thrust[ThrustIndex]) * (t - ThrustTimeStamp[ThrustIndex + 1]) / (ThrustTimeStamp[ThrustIndex + 1] - ThrustTimeStamp[ThrustIndex]);
-            return T;
+    while (t >= FThrustTimeStamp[0] && t <= FThrustTimeStamp[FThrustCount -1]) {
+        if (t < FThrustTimeStamp[FThrustIndex + 1]) {
+            Thrust = FThrust[FThrustIndex + 1] + (FThrust[FThrustIndex + 1] - FThrust[FThrustIndex]) * (t - FThrustTimeStamp[FThrustIndex + 1]) / (FThrustTimeStamp[FThrustIndex + 1] - FThrustTimeStamp[FThrustIndex]);
+            return Thrust;
         }
-        ThrustIndex += 1;
+        FThrustIndex += 1;
     }
-    T = 0;
-    return T;
+    Thrust = 0;
+    return Thrust;
 }

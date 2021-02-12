@@ -3,12 +3,12 @@
 
 //--------------------------------ƒ‰ƒ“ƒ`ƒƒ[ŠŠ‘–Žž---------------------------------//
 void launcher(Rocket_data *Rocket, double *t) {
-	FILE *fp1, *fp2;
-	if ((fp1 = fopen("launcher_XYZ_data.txt", "w")) == NULL) {
+	FILE *fpXYZ, *fpV;
+	if ((fpXYZ = fopen("launcher_XYZ_data.txt", "w")) == NULL) {
 		fprintf(stderr, "File_error_launcher_XYZ_data");
 		exit(1);
 	}
-	if ((fp2 = fopen("launcher_V_data.txt", "w")) == NULL) {
+	if ((fpV = fopen("launcher_V_data.txt", "w")) == NULL) {
 		fprintf(stderr, "File_error_launcher_V_data");
 		exit(1);
 	}
@@ -16,18 +16,18 @@ void launcher(Rocket_data *Rocket, double *t) {
 	while (Rocket->z <= (LAUNCHER_L * cos(LAUNCHER_ANGLE))) {
 		rungekutta_launcher(Rocket, *t);
 		if ((int)(*t / DT) % (int)(SAMPLING_T / DT) == 0) {
-			fprintf(fp1, "%lf\t%lf\t%lf\t%lf\t%lf\n", *t, Rocket->x, Rocket->y, Rocket->z,Rocket->gamma);
-			fprintf(fp2, "%lf\t%d\t%lf\t%lf\t%lf\t%lf\n", *t,ThrustIndex,ThrustTimeStamp[ThrustIndex],Thrust[ThrustIndex],impulse(*t), Rocket->v_abs);
+			fprintf(fpXYZ, "%lf\t%lf\t%lf\t%lf\t%lf\n", *t, Rocket->x, Rocket->y, Rocket->z,Rocket->gamma);
+			fprintf(fpV, "%lf\t%d\t%lf\t%lf\t%lf\t%lf\n", *t,FThrustIndex,FThrustTimeStamp[FThrustIndex],FThrust[FThrustIndex],impulse(*t), Rocket->v_abs);
 		}
 		*t += DT;
 	}
-	fclose(fp1);
-	fclose(fp2);
+	fclose(fpXYZ);
+	fclose(fpV);
 }
 
 void rungekutta_launcher(Rocket_data *Rocket, double t) {
 	double k1[6], k2[6], k3[6], k4[6];
-	Rocket_data Rocket_temp[4] = 
+	Rocket_data RocketTemp[4] = 
 	{
 		*Rocket, *Rocket, *Rocket, *Rocket	
 	};
@@ -35,22 +35,22 @@ void rungekutta_launcher(Rocket_data *Rocket, double t) {
 
 	//================Step_01=========================================//
 	
-	k1[V_X] = DT * launcher_equation_x_2(Rocket_temp[0], t);
-	k1[V_Y] = DT * launcher_equation_y_2(Rocket_temp[0], t);
-	k1[V_Z] = DT * launcher_equation_z_2(Rocket_temp[0], t);
+	k1[V_X] = DT * launcher_equation_x_2(RocketTemp[0], t);
+	k1[V_Y] = DT * launcher_equation_y_2(RocketTemp[0], t);
+	k1[V_Z] = DT * launcher_equation_z_2(RocketTemp[0], t);
 
-	k1[X] = DT * launcher_equation_x_1(Rocket_temp[0], t);
-	k1[Y] = DT * launcher_equation_y_1(Rocket_temp[0], t);
-	k1[Z] = DT * launcher_equation_z_1(Rocket_temp[0], t);
+	k1[X] = DT * launcher_equation_x_1(RocketTemp[0], t);
+	k1[Y] = DT * launcher_equation_y_1(RocketTemp[0], t);
+	k1[Z] = DT * launcher_equation_z_1(RocketTemp[0], t);
 	
-	Rocket_temp[1].v_x_abs += k1[V_X] / 2.0;
-	Rocket_temp[1].x += k1[X] / 2.0;
+	RocketTemp[1].v_x_abs += k1[V_X] / 2.0;
+	RocketTemp[1].x += k1[X] / 2.0;
 
-	Rocket_temp[1].v_y_abs += k1[V_Y] / 2.0;
-	Rocket_temp[1].y += k1[Y] / 2.0;
+	RocketTemp[1].v_y_abs += k1[V_Y] / 2.0;
+	RocketTemp[1].y += k1[Y] / 2.0;
 
-	Rocket_temp[1].v_z_abs += k1[V_Z] / 2.0;
-	Rocket_temp[1].z += k1[Z] / 2.0;
+	RocketTemp[1].v_z_abs += k1[V_Z] / 2.0;
+	RocketTemp[1].z += k1[Z] / 2.0;
 
 	/*
 	k1[V_X] = DT * launcher_equation_x_2( v_x_abs, t);
@@ -67,22 +67,22 @@ void rungekutta_launcher(Rocket_data *Rocket, double t) {
 	//===================Step_02=========================================//
 
 	
-	k2[V_X] = DT * launcher_equation_x_2(Rocket_temp[1], t + (DT / 2.0));
-	k2[V_Y] = DT * launcher_equation_y_2(Rocket_temp[1], t + (DT / 2.0));
-	k2[V_Z] = DT * launcher_equation_z_2(Rocket_temp[1], t + (DT / 2.0));
+	k2[V_X] = DT * launcher_equation_x_2(RocketTemp[1], t + (DT / 2.0));
+	k2[V_Y] = DT * launcher_equation_y_2(RocketTemp[1], t + (DT / 2.0));
+	k2[V_Z] = DT * launcher_equation_z_2(RocketTemp[1], t + (DT / 2.0));
 
-	k2[X] = DT * launcher_equation_x_1(Rocket_temp[1], t + (DT / 2.0));
-	k2[Y] = DT * launcher_equation_y_1(Rocket_temp[1], t + (DT / 2.0));
-	k2[Z] = DT * launcher_equation_z_1(Rocket_temp[1], t + (DT / 2.0));
+	k2[X] = DT * launcher_equation_x_1(RocketTemp[1], t + (DT / 2.0));
+	k2[Y] = DT * launcher_equation_y_1(RocketTemp[1], t + (DT / 2.0));
+	k2[Z] = DT * launcher_equation_z_1(RocketTemp[1], t + (DT / 2.0));
 
-	Rocket_temp[2].v_x_abs += k2[V_X] / 2.0;
-	Rocket_temp[2].x += k2[X] / 2.0;
+	RocketTemp[2].v_x_abs += k2[V_X] / 2.0;
+	RocketTemp[2].x += k2[X] / 2.0;
 
-	Rocket_temp[2].v_y_abs += k2[V_Y] / 2.0;
-	Rocket_temp[2].y += k2[Y] / 2.0;
+	RocketTemp[2].v_y_abs += k2[V_Y] / 2.0;
+	RocketTemp[2].y += k2[Y] / 2.0;
 
-	Rocket_temp[2].v_z_abs += k2[V_Z] / 2.0;
-	Rocket_temp[2].z += k2[Z] / 2.0;
+	RocketTemp[2].v_z_abs += k2[V_Z] / 2.0;
+	RocketTemp[2].z += k2[Z] / 2.0;
     
 	/*
 	k2[V_X] = DT * launcher_equation_x_2( v_x_abs + k1[V_X] / 2.0, t + (DT / 2.0));
@@ -98,22 +98,22 @@ void rungekutta_launcher(Rocket_data *Rocket, double t) {
 	//===================Step_03=========================================//
 
 	
-	k3[V_X] = DT * launcher_equation_x_2(Rocket_temp[2], t + (DT / 2.0));
-	k3[V_Y] = DT * launcher_equation_y_2(Rocket_temp[2], t + (DT / 2.0));
-	k3[V_Z] = DT * launcher_equation_z_2(Rocket_temp[2], t + (DT / 2.0));
+	k3[V_X] = DT * launcher_equation_x_2(RocketTemp[2], t + (DT / 2.0));
+	k3[V_Y] = DT * launcher_equation_y_2(RocketTemp[2], t + (DT / 2.0));
+	k3[V_Z] = DT * launcher_equation_z_2(RocketTemp[2], t + (DT / 2.0));
 
-	k3[X] = DT * launcher_equation_x_1(Rocket_temp[2], t + (DT / 2.0));
-	k3[Y] = DT * launcher_equation_y_1(Rocket_temp[2], t + (DT / 2.0));
-	k3[Z] = DT * launcher_equation_z_1(Rocket_temp[2], t + (DT / 2.0));
+	k3[X] = DT * launcher_equation_x_1(RocketTemp[2], t + (DT / 2.0));
+	k3[Y] = DT * launcher_equation_y_1(RocketTemp[2], t + (DT / 2.0));
+	k3[Z] = DT * launcher_equation_z_1(RocketTemp[2], t + (DT / 2.0));
 
-	Rocket_temp[3].v_x_abs += k3[V_X];
-	Rocket_temp[3].x += k3[X];
+	RocketTemp[3].v_x_abs += k3[V_X];
+	RocketTemp[3].x += k3[X];
 
-	Rocket_temp[3].v_y_abs += k3[V_Y] ;
-	Rocket_temp[3].y += k3[Y];
+	RocketTemp[3].v_y_abs += k3[V_Y] ;
+	RocketTemp[3].y += k3[Y];
 
-	Rocket_temp[3].v_z_abs += k3[V_Z] ;
-	Rocket_temp[3].z += k3[Z];
+	RocketTemp[3].v_z_abs += k3[V_Z] ;
+	RocketTemp[3].z += k3[Z];
 	
 	/*
 	k3[V_X] = DT * launcher_equation_x_2( v_x_abs + k2[V_X] / 2.0, t + (DT / 2.0));
@@ -129,13 +129,13 @@ void rungekutta_launcher(Rocket_data *Rocket, double t) {
 	//===================Step_04=========================================//
 
 	
-	k4[V_X] = DT * launcher_equation_x_2(Rocket_temp[3], t + DT);
-	k4[V_Y] = DT * launcher_equation_y_2(Rocket_temp[3], t + DT);
-	k4[V_Z] = DT * launcher_equation_z_2(Rocket_temp[3], t + DT);
+	k4[V_X] = DT * launcher_equation_x_2(RocketTemp[3], t + DT);
+	k4[V_Y] = DT * launcher_equation_y_2(RocketTemp[3], t + DT);
+	k4[V_Z] = DT * launcher_equation_z_2(RocketTemp[3], t + DT);
 
-	k4[X] = DT * launcher_equation_x_1(Rocket_temp[3], t+DT);
-	k4[Y] = DT * launcher_equation_y_1(Rocket_temp[3], t+DT);
-	k4[Z] = DT * launcher_equation_z_1(Rocket_temp[3], t+DT);
+	k4[X] = DT * launcher_equation_x_1(RocketTemp[3], t+DT);
+	k4[Y] = DT * launcher_equation_y_1(RocketTemp[3], t+DT);
+	k4[Z] = DT * launcher_equation_z_1(RocketTemp[3], t+DT);
 	
 	/*
 	k4[V_X] = DT * launcher_equation_x_2( v_x_abs + k3[X] / 2.0, t + (DT / 2.0));

@@ -28,7 +28,7 @@ GLOBAL double thrust_rotate_equation_z_1(Rocket_data Rocket, Wind_data Wind, dou
 GLOBAL double thrust_rotate_equation_z_2(Rocket_data Rocket, Wind_data Wind, double t);
 
 
-/*慣性飛行時(下降時)　->　inertia_fall.cpp　*/
+/*慣性飛行時(下降時)　->　inertiafall.cpp　*/
 GLOBAL void inertia_fall(Rocket_data *Rocket, Wind_data *Wind, double *t);
 GLOBAL void rungekutta_inertia_fall(Rocket_data *Rocket, Wind_data *Wind, double t);
 GLOBAL double inertia_fall_equation_v_x(Rocket_data Rocket, Wind_data Wind, double t);

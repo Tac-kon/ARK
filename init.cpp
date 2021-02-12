@@ -56,10 +56,10 @@ void init(Rocket_data *Rocket) {
 }
 
 void normalization_wind(Wind_data *Wind, Rocket_data Rocket) {
-    //Wind->phi = WIND_DEG;
+    //Wind->phi = FWindDeg;
     Wind->w_abs = wind_height(Rocket);
-    Wind->w_x = -Wind->w_abs * cos(WIND_DEG);
-    Wind->w_y = -Wind->w_abs * sin(WIND_DEG);
+    Wind->w_x = -Wind->w_abs * cos(FWindDeg);
+    Wind->w_y = -Wind->w_abs * sin(FWindDeg);
     //Wind->w_gamma = Wind->w_x * cos(Rocket.psi) + Wind->w_y * sin(Rocket.psi);
     //Wind->w_phi = -1.0 * Wind->w_x * sin(Rocket.psi) + Wind->w_y * cos(Rocket.psi);
 }
@@ -67,7 +67,7 @@ void normalization_wind(Wind_data *Wind, Rocket_data Rocket) {
 //‚“x-•—‘¬ŠÖ”
 double wind_height(Rocket_data Rocket) {
     double ans;
-    ans = (WIND_ABS * pow((Rocket.z / 10.0), 1.0 / 7.0));
+    ans = (FWindAbs * pow((Rocket.z / 10.0), 1.0 / 7.0));
     return ans;
 }
 

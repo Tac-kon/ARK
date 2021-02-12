@@ -9,8 +9,8 @@
 
 /*ランチャー関係*/
 //----------------------------------------------------------------------------//
-#define LAUNCHER_ANGLE deg_to_rad(17.0)	//ランチャー角[rad](Min 87.0)_z軸からの角度を採用
-#define AZIMUTH_ANGLE deg_to_rad(0.0)	//打上方位角[rad]_磁東からの角度(反時計回りが正)
+#define LAUNCHER_ANGLE DegToRad(17.0)	//ランチャー角[rad](Min 87.0)_z軸からの角度を採用
+#define AZIMUTH_ANGLE DegToRad(0.0)	//打上方位角[rad]_磁東からの角度(反時計回りが正)
 #define LAUNCHER_L 5.0     				//ランチャー長[m]
 
 /*機体パラメータ*/
@@ -34,12 +34,12 @@
 
 /*パラシュート関係*/
 //----------------------------------------------------------------------------//
-#define PARA_CD  1.1				    //パラシュートの抗力係数うふ
-#define	PARA_S_1 0.5					//ドローシュート投影面積[m^2]あは
-#define PARA_S_2 0					    //メインパラシュート投影面積[m^2]えへ
-#define PARA_1_T 10.0					//ドローシュート開傘時間[sec] (点火後からの経過時間)うひょ
-#define PARA_2_TIME	2.0					//メインパラシュート開傘時間[sec] (ドローシュート射出後からの経過時間)うへうへ
-#define PARA_1_ERROR 1.0        		//動作からドローシュート展開までの誤差時間 [sec]いひひひ
+#define PARA_CD  1.1				    //パラシュートの抗力係数
+#define	PARA_S_1 0.5					//ドローシュート投影面積[m^2]
+#define PARA_S_2 0					    //メインパラシュート投影面積[m^2]
+#define PARA_1t 10.0					//ドローシュート開傘時間[sec] (点火後からの経過時間)
+#define PARA_2tIME	2.0					//メインパラシュート開傘時間[sec] (ドローシュート射出後からの経過時間)
+#define PARA_1_ERROR 1.0        		//動作からドローシュート展開までの誤差時間 [sec]
 #define PARA_2_ERROR 1.0				//動作からメインパラシュート展開までの誤差時間 [sec]
 
 //#define ALPHA_ERROR 0.1               //ALPHAの係数
@@ -72,7 +72,7 @@
 #define MAX_VELOCITY(x,y) (x > y ? x : y)
 #define MAX_DISTANCE(x,y) (x > y ? x : y)
 #define TIME_DEVELOP(x,y) (x > y ? x : y)
-#define deg_to_rad(x) ((x/180.0)*M_PI)
+#define DegToRad(x) ((x/180.0)*M_PI)
 #define R_V_X 9
 #define R_V_Y 10
 #define R_V_Z 11

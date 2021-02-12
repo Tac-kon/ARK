@@ -3,50 +3,50 @@
 
 //--------------------------êÑóÕãyÇ—äµê´îÚçséû(è„è∏éû)-----------------------------//
 void thrust_inertia(Rocket_data *Rocket, Wind_data *Wind, double *t) {
-	FILE *fp1, *fp2/*, *fp3*/;
-	if((fp1 = fopen("thrust_inertia_XYZ_data.txt", "w")) == NULL) {
-		fprintf(stderr, "File_error_thrust_inertia_XYZ_data");
+	FILE *fpXYZ, *fpV;
+	if((fpXYZ = fopen("thrust_inertia_XYZ_data.txt", "w")) == NULL) {
+		fprintf(stderr, "File_errorthrust_inertia_XYZ_data");
 		exit(1);
 	}
-	if((fp2 = fopen("thrust_inertia_V_data.txt", "w")) == NULL) {
-		fprintf(stderr, "File_error_thrust_inertia_V_data");
+	if((fpV = fopen("thrust_inertia_V_data.txt", "w")) == NULL) {
+		fprintf(stderr, "File_errorthrust_inertia_V_data");
 		exit(1);
 	}
 
     normalization_wind(Wind, *Rocket);
 
-	while ( Rocket->z  >= (g_max_height)) {
-		//printf("max_distance_x_t = %lf\n", max_distance_x_t);
+	while ( Rocket->z  >= (FMaxHeight)) {
+		//printf("FMaxDistanceXt = %lf\n", FMaxDistanceXt);
 		//printf("gamma = %lf\n", Rocket->gamma * 180.0 / M_PI);
 		//printf("r_x = %lf\n", Rocket->r_x * 180.0 / M_PI);
 		//printf("alpha = %lf\n", Rocket->alpha * 180.0 / M_PI);
 		rungekutta_thrust_inertia_rotate(Rocket, Wind, *t);
 		if((int)(*t / DT) % (int)(SAMPLING_T / DT) == 0) {
-			fprintf(fp1, "%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\n", *t, Rocket->x, Rocket->y, Rocket->z,Rocket->psi,Rocket->alpha, Rocket->r);
-			fprintf(fp2, "%lf\t%lf\t%lf\t%lf\t%lf\tf\n", *t, Rocket->v_abs, Rocket->v_x_abs, Rocket->v_y_abs, Rocket->v_z_abs);
+			fprintf(fpXYZ, "%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\n", *t, Rocket->x, Rocket->y, Rocket->z,Rocket->psi,Rocket->alpha, Rocket->r);
+			fprintf(fpV, "%lf\t%lf\t%lf\t%lf\t%lf\tf\n", *t, Rocket->v_abs, Rocket->v_x_abs, Rocket->v_y_abs, Rocket->v_z_abs);
 		}
 		
 		*t += DT; 
 		//printf("t=%lf,z=%lf,v=%lf\n", *t,Rocket->z, Rocket->v_abs);
-		g_max_height = MAX_HEIGHT(Rocket->z, g_max_height);
+		FMaxHeight = MAX_HEIGHT(Rocket->z, FMaxHeight);
 		//ë¨Ç≥ÇÃç≈ëÂíl
-		if (Rocket->v_abs >= (max_velocity)) {
-			max_velocity = MAX_VELOCITY(Rocket->v_abs, max_velocity);
+		if (Rocket->v_abs >= (FMaxVelocity)) {
+			FMaxVelocity = MAX_VELOCITY(Rocket->v_abs, FMaxVelocity);
 		}
 		//óÃàÊ(xï˚å¸)
-		if (abs(Rocket->x) >= (max_distance_x_t)) {
-			max_distance_x_t = MAX_DISTANCE(abs(Rocket->x), max_distance_x_t);
+		if (abs(Rocket->x) >= (FMaxDistanceXt)) {
+			FMaxDistanceXt = MAX_DISTANCE(abs(Rocket->x), FMaxDistanceXt);
 		}
 		//óÃàÊ(yï˚å¸)
-		if (abs(Rocket->y) >= (max_distance_y_t)) {
-			max_distance_y_t = MAX_DISTANCE(abs(Rocket->y), max_distance_y_t);
+		if (abs(Rocket->y) >= (FMaxDistanceYt)) {
+			FMaxDistanceYt = MAX_DISTANCE(abs(Rocket->y), FMaxDistanceYt);
 		}
 
 	} 
 
 	
-	fclose(fp1);
-	fclose(fp2);
+	fclose(fpXYZ);
+	fclose(fpV);
 	
 }
 
@@ -54,12 +54,12 @@ void thrust_inertia(Rocket_data *Rocket, Wind_data *Wind, double *t) {
 
 void rungekutta_thrust_inertia_rotate(Rocket_data *Rocket, Wind_data *Wind, double t) {
     double k1[12], k2[12], k3[12], k4[12];
-    Rocket_data Rocket_temp[4] =
+    Rocket_data RocketTemp[4] =
     {
         *Rocket, *Rocket, *Rocket, *Rocket
     };
 
-    Wind_data Wind_temp[4] =
+    Wind_data WindTemp[4] =
     {
         *Wind, *Wind, *Wind, *Wind
     };
@@ -67,48 +67,48 @@ void rungekutta_thrust_inertia_rotate(Rocket_data *Rocket, Wind_data *Wind, doub
     //===================Step_01=========================================//
 
     //ï¿êiâ^ìÆ
-    k1[V_X] = DT * thrust_inertia_equation_x_2(Rocket_temp[0], Wind_temp[0], t);
-    k1[V_Y] = DT * thrust_inertia_equation_y_2(Rocket_temp[0], Wind_temp[0], t);
-    k1[V_Z] = DT * thrust_inertia_equation_z_2(Rocket_temp[0], Wind_temp[0], t);
+    k1[V_X] = DT * thrust_inertia_equation_x_2(RocketTemp[0], WindTemp[0], t);
+    k1[V_Y] = DT * thrust_inertia_equation_y_2(RocketTemp[0], WindTemp[0], t);
+    k1[V_Z] = DT * thrust_inertia_equation_z_2(RocketTemp[0], WindTemp[0], t);
 
-    k1[X] = DT * thrust_inertia_equation_x_1(Rocket_temp[0], Wind_temp[0], t);
-    k1[Y] = DT * thrust_inertia_equation_y_1(Rocket_temp[0], Wind_temp[0], t);
-    k1[Z] = DT * thrust_inertia_equation_z_1(Rocket_temp[0], Wind_temp[0], t);
+    k1[X] = DT * thrust_inertia_equation_x_1(RocketTemp[0], WindTemp[0], t);
+    k1[Y] = DT * thrust_inertia_equation_y_1(RocketTemp[0], WindTemp[0], t);
+    k1[Z] = DT * thrust_inertia_equation_z_1(RocketTemp[0], WindTemp[0], t);
 
 
     //âÒì]â^ìÆ
-    k1[R_V_X] = DT * thrust_rotate_equation_x_2(Rocket_temp[0], Wind_temp[0], t);
-    k1[R_V_Y] = DT * thrust_rotate_equation_y_2(Rocket_temp[0], Wind_temp[0], t);
-    k1[R_V_Z] = DT * thrust_rotate_equation_z_2(Rocket_temp[0], Wind_temp[0], t);
+    k1[R_V_X] = DT * thrust_rotate_equation_x_2(RocketTemp[0], WindTemp[0], t);
+    k1[R_V_Y] = DT * thrust_rotate_equation_y_2(RocketTemp[0], WindTemp[0], t);
+    k1[R_V_Z] = DT * thrust_rotate_equation_z_2(RocketTemp[0], WindTemp[0], t);
 
-    k1[R_X] = DT * thrust_rotate_equation_x_1(Rocket_temp[0], Wind_temp[0], t);
-    k1[R_Y] = DT * thrust_rotate_equation_y_1(Rocket_temp[0], Wind_temp[0], t);
-    k1[R_Z] = DT * thrust_rotate_equation_z_1(Rocket_temp[0], Wind_temp[0], t);
-
-
-
-    Rocket_temp[1].v_x_abs += k1[V_X] / 2.0;
-    Rocket_temp[1].x += k1[X] / 2.0;
-
-    Rocket_temp[1].v_y_abs += k1[V_Y] / 2.0;
-    Rocket_temp[1].y += k1[Y] / 2.0;
-
-    Rocket_temp[1].v_z_abs += k1[V_Z] / 2.0;
-    Rocket_temp[1].z += k1[Z] / 2.0;
-
-    Rocket_temp[1].r_v_x += k1[R_V_X] / 2.0;
-    Rocket_temp[1].r_x += k1[R_X] / 2.0;
-
-    Rocket_temp[1].r_v_y += k1[R_V_Y] / 2.0;
-    Rocket_temp[1].r_y += k1[R_Y] / 2.0;
-
-    Rocket_temp[1].r_v_z += k1[R_V_Z] / 2.0;
-    Rocket_temp[1].r_z += k1[R_Z] / 2.0;
+    k1[R_X] = DT * thrust_rotate_equation_x_1(RocketTemp[0], WindTemp[0], t);
+    k1[R_Y] = DT * thrust_rotate_equation_y_1(RocketTemp[0], WindTemp[0], t);
+    k1[R_Z] = DT * thrust_rotate_equation_z_1(RocketTemp[0], WindTemp[0], t);
 
 
-    //normalization(&Rocket_temp[0][1]);//íºåâª
-    //normalization(&Rocket_temp[1][1]);
-    //normalization(&Rocket_temp[2][1]);
+
+    RocketTemp[1].v_x_abs += k1[V_X] / 2.0;
+    RocketTemp[1].x += k1[X] / 2.0;
+
+    RocketTemp[1].v_y_abs += k1[V_Y] / 2.0;
+    RocketTemp[1].y += k1[Y] / 2.0;
+
+    RocketTemp[1].v_z_abs += k1[V_Z] / 2.0;
+    RocketTemp[1].z += k1[Z] / 2.0;
+
+    RocketTemp[1].r_v_x += k1[R_V_X] / 2.0;
+    RocketTemp[1].r_x += k1[R_X] / 2.0;
+
+    RocketTemp[1].r_v_y += k1[R_V_Y] / 2.0;
+    RocketTemp[1].r_y += k1[R_Y] / 2.0;
+
+    RocketTemp[1].r_v_z += k1[R_V_Z] / 2.0;
+    RocketTemp[1].r_z += k1[R_Z] / 2.0;
+
+
+    //normalization(&RocketTemp[0][1]);//íºåâª
+    //normalization(&RocketTemp[1][1]);
+    //normalization(&RocketTemp[2][1]);
 
 
     //===================================================================//
@@ -116,114 +116,114 @@ void rungekutta_thrust_inertia_rotate(Rocket_data *Rocket, Wind_data *Wind, doub
     //===================Step_02=========================================//
 
     //ï¿êiâ^ìÆ
-    k2[V_X] = DT * thrust_inertia_equation_x_2(Rocket_temp[1], Wind_temp[1], t + (DT / 2.0));
-    k2[V_Y] = DT * thrust_inertia_equation_y_2(Rocket_temp[1], Wind_temp[1], t + (DT / 2.0));
-    k2[V_Z] = DT * thrust_inertia_equation_z_2(Rocket_temp[1], Wind_temp[1], t + (DT / 2.0));
+    k2[V_X] = DT * thrust_inertia_equation_x_2(RocketTemp[1], WindTemp[1], t + (DT / 2.0));
+    k2[V_Y] = DT * thrust_inertia_equation_y_2(RocketTemp[1], WindTemp[1], t + (DT / 2.0));
+    k2[V_Z] = DT * thrust_inertia_equation_z_2(RocketTemp[1], WindTemp[1], t + (DT / 2.0));
 
-    k2[X] = DT * thrust_inertia_equation_x_1(Rocket_temp[1], Wind_temp[1], t + (DT / 2.0));
-    k2[Y] = DT * thrust_inertia_equation_y_1(Rocket_temp[1], Wind_temp[1], t + (DT / 2.0));
-    k2[Z] = DT * thrust_inertia_equation_z_1(Rocket_temp[1], Wind_temp[1], t + (DT / 2.0));
+    k2[X] = DT * thrust_inertia_equation_x_1(RocketTemp[1], WindTemp[1], t + (DT / 2.0));
+    k2[Y] = DT * thrust_inertia_equation_y_1(RocketTemp[1], WindTemp[1], t + (DT / 2.0));
+    k2[Z] = DT * thrust_inertia_equation_z_1(RocketTemp[1], WindTemp[1], t + (DT / 2.0));
 
 
     //âÒì]â^ìÆ
-    k2[R_V_X] = DT * thrust_rotate_equation_x_2(Rocket_temp[1], Wind_temp[1], t + (DT / 2.0));
-    k2[R_V_Y] = DT * thrust_rotate_equation_y_2(Rocket_temp[1], Wind_temp[1], t + (DT / 2.0));
-    k2[R_V_Z] = DT * thrust_rotate_equation_z_2(Rocket_temp[1], Wind_temp[1], t + (DT / 2.0));
+    k2[R_V_X] = DT * thrust_rotate_equation_x_2(RocketTemp[1], WindTemp[1], t + (DT / 2.0));
+    k2[R_V_Y] = DT * thrust_rotate_equation_y_2(RocketTemp[1], WindTemp[1], t + (DT / 2.0));
+    k2[R_V_Z] = DT * thrust_rotate_equation_z_2(RocketTemp[1], WindTemp[1], t + (DT / 2.0));
 
-    k2[R_X] = DT * thrust_rotate_equation_x_1(Rocket_temp[1], Wind_temp[1], t + (DT / 2.0));
-    k2[R_Y] = DT * thrust_rotate_equation_y_1(Rocket_temp[1], Wind_temp[1], t + (DT / 2.0));
-    k2[R_Z] = DT * thrust_rotate_equation_z_1(Rocket_temp[1], Wind_temp[1], t + (DT / 2.0));
+    k2[R_X] = DT * thrust_rotate_equation_x_1(RocketTemp[1], WindTemp[1], t + (DT / 2.0));
+    k2[R_Y] = DT * thrust_rotate_equation_y_1(RocketTemp[1], WindTemp[1], t + (DT / 2.0));
+    k2[R_Z] = DT * thrust_rotate_equation_z_1(RocketTemp[1], WindTemp[1], t + (DT / 2.0));
 
-    Rocket_temp[2].v_x_abs += k2[V_X] / 2.0;
-    Rocket_temp[2].x += k2[X] / 2.0;
+    RocketTemp[2].v_x_abs += k2[V_X] / 2.0;
+    RocketTemp[2].x += k2[X] / 2.0;
 
-    Rocket_temp[2].v_y_abs += k2[V_Y] / 2.0;
-    Rocket_temp[2].y += k2[Y] / 2.0;
+    RocketTemp[2].v_y_abs += k2[V_Y] / 2.0;
+    RocketTemp[2].y += k2[Y] / 2.0;
 
-    Rocket_temp[2].v_z_abs += k2[V_Z] / 2.0;
-    Rocket_temp[2].z += k2[Z] / 2.0;
+    RocketTemp[2].v_z_abs += k2[V_Z] / 2.0;
+    RocketTemp[2].z += k2[Z] / 2.0;
 
-    Rocket_temp[2].r_v_x += k2[R_V_X] / 2.0;
-    Rocket_temp[2].r_x += k2[R_X] / 2.0;
+    RocketTemp[2].r_v_x += k2[R_V_X] / 2.0;
+    RocketTemp[2].r_x += k2[R_X] / 2.0;
 
-    Rocket_temp[2].r_v_y += k2[R_V_Y] / 2.0;
-    Rocket_temp[2].r_y += k2[R_Y] / 2.0;
+    RocketTemp[2].r_v_y += k2[R_V_Y] / 2.0;
+    RocketTemp[2].r_y += k2[R_Y] / 2.0;
 
-    Rocket_temp[2].r_v_z += k2[R_V_Z] / 2.0;
-    Rocket_temp[2].r_z += k2[R_Z] / 2.0;
+    RocketTemp[2].r_v_z += k2[R_V_Z] / 2.0;
+    RocketTemp[2].r_z += k2[R_Z] / 2.0;
 
-    //normalization(&Rocket_temp[0][2]);//íºåâª
-    //normalization(&Rocket_temp[1][2]);
-    //normalization(&Rocket_temp[2][2]);
+    //normalization(&RocketTemp[0][2]);//íºåâª
+    //normalization(&RocketTemp[1][2]);
+    //normalization(&RocketTemp[2][2]);
 
     //===================================================================//
 
     //===================Step_03=========================================//
 
     //ï¿êiâ^ìÆ
-    k3[V_X] = DT * thrust_inertia_equation_x_2(Rocket_temp[2], Wind_temp[2], t + (DT / 2.0));
-    k3[V_Y] = DT * thrust_inertia_equation_y_2(Rocket_temp[2], Wind_temp[2], t + (DT / 2.0));
-    k3[V_Z] = DT * thrust_inertia_equation_z_2(Rocket_temp[2], Wind_temp[2], t + (DT / 2.0));
+    k3[V_X] = DT * thrust_inertia_equation_x_2(RocketTemp[2], WindTemp[2], t + (DT / 2.0));
+    k3[V_Y] = DT * thrust_inertia_equation_y_2(RocketTemp[2], WindTemp[2], t + (DT / 2.0));
+    k3[V_Z] = DT * thrust_inertia_equation_z_2(RocketTemp[2], WindTemp[2], t + (DT / 2.0));
 
-    k3[X] = DT * thrust_inertia_equation_x_1(Rocket_temp[2], Wind_temp[2], t + (DT / 2.0));
-    k3[Y] = DT * thrust_inertia_equation_y_1(Rocket_temp[2], Wind_temp[2], t + (DT / 2.0));
-    k3[Z] = DT * thrust_inertia_equation_z_1(Rocket_temp[2], Wind_temp[2], t + (DT / 2.0));
+    k3[X] = DT * thrust_inertia_equation_x_1(RocketTemp[2], WindTemp[2], t + (DT / 2.0));
+    k3[Y] = DT * thrust_inertia_equation_y_1(RocketTemp[2], WindTemp[2], t + (DT / 2.0));
+    k3[Z] = DT * thrust_inertia_equation_z_1(RocketTemp[2], WindTemp[2], t + (DT / 2.0));
 
 
     //âÒì]â^ìÆ
-    k3[R_V_X] = DT * thrust_rotate_equation_x_2(Rocket_temp[2], Wind_temp[2], t + (DT / 2.0));
-    k3[R_V_Y] = DT * thrust_rotate_equation_y_2(Rocket_temp[2], Wind_temp[2], t + (DT / 2.0));
-    k3[R_V_Z] = DT * thrust_rotate_equation_z_2(Rocket_temp[2], Wind_temp[2], t + (DT / 2.0));
+    k3[R_V_X] = DT * thrust_rotate_equation_x_2(RocketTemp[2], WindTemp[2], t + (DT / 2.0));
+    k3[R_V_Y] = DT * thrust_rotate_equation_y_2(RocketTemp[2], WindTemp[2], t + (DT / 2.0));
+    k3[R_V_Z] = DT * thrust_rotate_equation_z_2(RocketTemp[2], WindTemp[2], t + (DT / 2.0));
 
-    k3[R_X] = DT * thrust_rotate_equation_x_1(Rocket_temp[2], Wind_temp[2], t + (DT / 2.0));
-    k3[R_Y] = DT * thrust_rotate_equation_y_1(Rocket_temp[2], Wind_temp[2], t + (DT / 2.0));
-    k3[R_Z] = DT * thrust_rotate_equation_z_1(Rocket_temp[2], Wind_temp[2], t + (DT / 2.0));
+    k3[R_X] = DT * thrust_rotate_equation_x_1(RocketTemp[2], WindTemp[2], t + (DT / 2.0));
+    k3[R_Y] = DT * thrust_rotate_equation_y_1(RocketTemp[2], WindTemp[2], t + (DT / 2.0));
+    k3[R_Z] = DT * thrust_rotate_equation_z_1(RocketTemp[2], WindTemp[2], t + (DT / 2.0));
 
-    Rocket_temp[3].v_x_abs += k3[V_X];
-    Rocket_temp[3].x += k3[X];
+    RocketTemp[3].v_x_abs += k3[V_X];
+    RocketTemp[3].x += k3[X];
 
-    Rocket_temp[3].v_y_abs += k3[V_Y] / 2.0;
-    Rocket_temp[3].y += k3[Y];
+    RocketTemp[3].v_y_abs += k3[V_Y] / 2.0;
+    RocketTemp[3].y += k3[Y];
 
-    Rocket_temp[2].v_z_abs += k3[V_Z] / 2.0;
-    Rocket_temp[3].z += k3[Z];
+    RocketTemp[2].v_z_abs += k3[V_Z] / 2.0;
+    RocketTemp[3].z += k3[Z];
 
-    Rocket_temp[3].r_v_x += k3[V_X];
-    Rocket_temp[3].r_x += k3[X];
+    RocketTemp[3].r_v_x += k3[V_X];
+    RocketTemp[3].r_x += k3[X];
 
-    Rocket_temp[3].r_v_y += k3[V_Y] / 2.0;
-    Rocket_temp[3].r_y += k3[Y];
+    RocketTemp[3].r_v_y += k3[V_Y] / 2.0;
+    RocketTemp[3].r_y += k3[Y];
 
-    Rocket_temp[2].r_v_z += k3[V_Z] / 2.0;
-    Rocket_temp[3].r_z += k3[Z];
+    RocketTemp[2].r_v_z += k3[V_Z] / 2.0;
+    RocketTemp[3].r_z += k3[Z];
 
 
-    //normalization(&Rocket_temp[0][3]);//íºåâª
-    //normalization(&Rocket_temp[1][3]);
-    //normalization(&Rocket_temp[2][3]);
+    //normalization(&RocketTemp[0][3]);//íºåâª
+    //normalization(&RocketTemp[1][3]);
+    //normalization(&RocketTemp[2][3]);
 
     //===================================================================//
 
     //===================Step_04=========================================//
 
     //ï¿êiâ^ìÆ
-    k4[V_X] = DT * thrust_inertia_equation_x_2(Rocket_temp[3], Wind_temp[3], t + DT);
-    k4[V_Y] = DT * thrust_inertia_equation_y_2(Rocket_temp[3], Wind_temp[3], t + DT);
-    k4[V_Z] = DT * thrust_inertia_equation_z_2(Rocket_temp[3], Wind_temp[3], t + DT);
+    k4[V_X] = DT * thrust_inertia_equation_x_2(RocketTemp[3], WindTemp[3], t + DT);
+    k4[V_Y] = DT * thrust_inertia_equation_y_2(RocketTemp[3], WindTemp[3], t + DT);
+    k4[V_Z] = DT * thrust_inertia_equation_z_2(RocketTemp[3], WindTemp[3], t + DT);
 
-    k4[X] = DT * thrust_inertia_equation_x_1(Rocket_temp[3], Wind_temp[3], t + DT);
-    k4[Y] = DT * thrust_inertia_equation_y_1(Rocket_temp[3], Wind_temp[3], t + DT);
-    k4[Z] = DT * thrust_inertia_equation_z_1(Rocket_temp[3], Wind_temp[3], t + DT);
+    k4[X] = DT * thrust_inertia_equation_x_1(RocketTemp[3], WindTemp[3], t + DT);
+    k4[Y] = DT * thrust_inertia_equation_y_1(RocketTemp[3], WindTemp[3], t + DT);
+    k4[Z] = DT * thrust_inertia_equation_z_1(RocketTemp[3], WindTemp[3], t + DT);
 
 
     //âÒì]â^ìÆ
-    k4[R_V_X] = DT * thrust_rotate_equation_x_2(Rocket_temp[3], Wind_temp[3], t + DT);
-    k4[R_V_Y] = DT * thrust_rotate_equation_y_2(Rocket_temp[3], Wind_temp[3], t + DT);
-    k4[R_V_Z] = DT * thrust_rotate_equation_z_2(Rocket_temp[3], Wind_temp[3], t + DT);
+    k4[R_V_X] = DT * thrust_rotate_equation_x_2(RocketTemp[3], WindTemp[3], t + DT);
+    k4[R_V_Y] = DT * thrust_rotate_equation_y_2(RocketTemp[3], WindTemp[3], t + DT);
+    k4[R_V_Z] = DT * thrust_rotate_equation_z_2(RocketTemp[3], WindTemp[3], t + DT);
 
-    k4[R_X] = DT * thrust_rotate_equation_x_1(Rocket_temp[3], Wind_temp[3], t + DT);
-    k4[R_Y] = DT * thrust_rotate_equation_y_1(Rocket_temp[3], Wind_temp[3], t + DT);
-    k4[R_Z] = DT * thrust_rotate_equation_z_1(Rocket_temp[3], Wind_temp[3], t + DT);
+    k4[R_X] = DT * thrust_rotate_equation_x_1(RocketTemp[3], WindTemp[3], t + DT);
+    k4[R_Y] = DT * thrust_rotate_equation_y_1(RocketTemp[3], WindTemp[3], t + DT);
+    k4[R_Z] = DT * thrust_rotate_equation_z_1(RocketTemp[3], WindTemp[3], t + DT);
 
 
     //===================================================================//
